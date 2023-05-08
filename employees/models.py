@@ -56,3 +56,4 @@ class Training(models.Model):
     description = models.TextField()
     duration = models.PositiveIntegerField()
     employees = models.ManyToManyField('Employee', related_name='trainings_completed')
+
