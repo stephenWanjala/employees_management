@@ -124,9 +124,21 @@ def department_employees(request, department_id):
 @api_view(['GET'])
 def employees_in_department(request, department_name):
     """
-    Retrieve a list of employees in a given department by the department name.
+    Get a list of employees in a department
+    :param request:
+    :param department_name:
+    :return:
     """
-    department = get_object_or_404(Department, name=department_name)
+    # find the department that matches the department_name
+    department = Department.objects.filter(name__icontains=department_name).first()
+
+    # if the department is not found, return an empty list
+    if department is None:
+        return Response([])
+
+    # find the employees that belong to the department
     employees = Employee.objects.filter(department=department)
+
+    # serialize the employees and return them
     serializer = EmployeeSerializer(employees, many=True)
     return Response(serializer.data)
