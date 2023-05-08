@@ -24,9 +24,9 @@ def employee_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def employee_detail(request, pk):
+def employee_detail(request, employee_id):
     try:
-        employee = Employee.objects.get(pk=pk)
+        employee = Employee.objects.get(pk=int(employee_id))
     except Employee.DoesNotExist:
         return Response(status=404)
 
