@@ -1,5 +1,5 @@
 # Create your views here.
-from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -39,14 +39,14 @@ def employee_list(request):
     if request.method == 'GET':
         employees = Employee.objects.all()
         serializer = EmployeeSerializer(employees, many=True, context={'request': request})
-        return Response(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         serializer = EmployeeSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -61,22 +61,22 @@ def employee_detail(request, employee_id):
     try:
         employee = Employee.objects.get(pk=int(employee_id))
     except Employee.DoesNotExist:
-        return Response(status=404)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = EmployeeSerializer(employee, context={'request': request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         serializer = EmployeeSerializer(employee, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         employee.delete()
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
@@ -88,7 +88,7 @@ def department_list(request):
     """
     departments = Department.objects.all()
     data = [{'id': department.id, 'name': department.name} for department in departments]
-    return Response(data)
+    return Response(data,status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -134,7 +134,7 @@ def employees_in_department(request, department_name):
 
     # if the department is not found, return an empty list
     if department is None:
-        return Response([])
+        return Response([], status=status.HTTP_404_NOT_FOUND)
 
     # find the employees that belong to the department
     employees = Employee.objects.filter(department=department)
