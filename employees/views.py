@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from employees.models import Employee, Department
-from employees.serializers.Serializers import EmployeeSerializer
+from employees.serializers.Serializers import EmployeeSerializer, EmployeeSerializerExpanded
 
 
 @api_view(['GET'])
@@ -29,7 +29,7 @@ def api_root(request, format=None):
     })
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def employee_list(request):
     """
     List all employees, or create a new employee.
@@ -38,14 +38,17 @@ def employee_list(request):
     """
     if request.method == 'GET':
         employees = Employee.objects.all()
-        serializer = EmployeeSerializer(employees, many=True, context={'request': request})
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        serializer = EmployeeSerializerExpanded(employees, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    elif request.method == 'POST':
-        serializer = EmployeeSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def create_employee(request):
+    serializer = EmployeeSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -88,7 +91,7 @@ def department_list(request):
     """
     departments = Department.objects.all()
     data = [{'id': department.id, 'name': department.name} for department in departments]
-    return Response(data,status=status.HTTP_200_OK)
+    return Response(data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -103,23 +106,6 @@ def department_employees(request, department_id):
     serializer = EmployeeSerializer(employees, many=True)
     return Response(serializer.data)
 
-
-# @api_view(['GET'])
-# def employees_in_department(request):
-#     # Filter by department
-#     """
-#     List all employees in a department. by the department name.
-#     :param request:
-#     :return:
-#     """
-#     department = request.query_params.get('department', None)
-#     if department is not None:
-#         employees = Employee.objects.filter(department__name__icontains=department)
-#     else:
-#         employees = Employee.objects.all()
-#
-#     serializer = EmployeeSerializer(employees, many=True)
-#     return Response(serializer.data)
 
 @api_view(['GET'])
 def employees_in_department(request, department_name):

@@ -3,14 +3,21 @@ from django.db import models
 
 # Create your models here.
 
+class JobTitle(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
 
 class Employee(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=255)
     phone_number = models.CharField(max_length=20)
-    job_title = models.ForeignKey('JobTitle', on_delete=models.CASCADE)
-    department = models.ForeignKey('Department', on_delete=models.CASCADE)
+    job_title = models.ForeignKey(JobTitle, on_delete=models.CASCADE)
+    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True, blank=True)
     hire_date = models.DateField()
     performance_goals = models.TextField()
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
@@ -37,15 +44,7 @@ class Department(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='managed_departments')
-
-    def __str__(self):
-        return self.name
-
-
-class JobTitle(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
+        related_name='department_manager')
 
     def __str__(self):
         return self.name
@@ -56,4 +55,3 @@ class Training(models.Model):
     description = models.TextField()
     duration = models.PositiveIntegerField()
     employees = models.ManyToManyField('Employee', related_name='trainings_completed')
-

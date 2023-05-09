@@ -13,11 +13,25 @@ class EmployeeSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Employee
         fields = '__all__'
+        # depth = 1
+        # expandable_fields = {
+        #     'manager': ('employees.EmployeeSerializer', {'source': 'manager'}),
+        #     'job_title': (JobTitleSerializer, {'source': 'job_title'}),
+        #     'department': ('employees.DepartmentSerializer', {'source': 'department'}),
+        #     'performance_reviews': ('employees.PerformanceReviewSerializer', {'many': True}),
+        #     'trainings_completed': ('employees.TrainingSerializer', {'many': True}),
+        # }
+
+
+class EmployeeSerializerExpanded(FlexFieldsModelSerializer):
+    class Meta:
+        model = Employee
+        fields = '__all__'
         depth = 1
         expandable_fields = {
             'manager': ('employees.EmployeeSerializer', {'source': 'manager'}),
             'job_title': (JobTitleSerializer, {'source': 'job_title'}),
-            'department': ('employees.DepartmentSerializer', {}),
+            'department': ('employees.DepartmentSerializer', {'source': 'department'}),
             'performance_reviews': ('employees.PerformanceReviewSerializer', {'many': True}),
             'trainings_completed': ('employees.TrainingSerializer', {'many': True}),
         }
