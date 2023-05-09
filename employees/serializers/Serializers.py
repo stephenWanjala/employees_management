@@ -37,6 +37,20 @@ class EmployeeSerializerExpanded(FlexFieldsModelSerializer):
         }
 
 
+class EmployeeSerializerExpandedDepartment(FlexFieldsModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'job_title', 'hire_date',
+                  'performance_goals', 'manager']
+        depth = 1
+        expandable_fields = {
+            'manager': ('employees.EmployeeSerializer', {'source': 'manager'}),
+            'job_title': (JobTitleSerializer, {'source': 'job_title'}),
+            'performance_reviews': ('employees.PerformanceReviewSerializer', {'many': True}),
+            'trainings_completed': ('employees.TrainingSerializer', {'many': True}),
+        }
+
+
 class PerformanceReviewSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = PerformanceReview
