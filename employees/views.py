@@ -95,3 +95,8 @@ class DepartmentList(generics.ListCreateAPIView):
 class TrainingList(generics.ListCreateAPIView):
     queryset = Training.objects.all()
     serializer_class = TrainingSerializer
+
+
+class TrainingDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Training.objects.all()
+    serializer_class = TrainingSerializer
