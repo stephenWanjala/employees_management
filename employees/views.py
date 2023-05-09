@@ -1,22 +1,37 @@
 # Create your views here.
+from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from employees.models import Employee, Department, Training
-from employees.serializers.Serializers import EmployeeSerializer, DepartmentSerializer, EmployeeSerializerExpanded, \
-    EmployeeSerializerExpandedDepartment, TrainingSerializer
-
+from employees.models import (
+    Employee, Department, Training
+)
+from employees.serializers.Serializers import (EmployeeSerializer, DepartmentSerializer,
+                                               EmployeeSerializerExpandedDepartment, TrainingSerializer,
+                                               RegisterSerializer)
 
 # @api_view(['GET'])
 # def api_root(request):
 #     return Response(
 #     )
+User = get_user_model()
 
 
-class EmployeeList(generics.ListCreateAPIView):
+class EmployeeList(generics.ListAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+
+    def get_queryset(self):
+        queryset = User.objects.filter(is_superuser=False)
+        return queryset
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = get_user_model().objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
 
 class EmployeeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -45,7 +60,7 @@ def department_employees(request, department_id):
     :return:
     """
     employees = Employee.objects.filter(department_id=department_id)
-    serializer = EmployeeSerializerExpanded(employees, many=True)
+    serializer = EmployeeSerializer(employees, many=True)
     return Response(serializer.data)
 
 
@@ -80,5 +95,3 @@ class DepartmentList(generics.ListCreateAPIView):
 class TrainingList(generics.ListCreateAPIView):
     queryset = Training.objects.all()
     serializer_class = TrainingSerializer
-
-
